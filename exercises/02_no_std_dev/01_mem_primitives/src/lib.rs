@@ -27,7 +27,10 @@
 pub unsafe extern "C" fn my_memcpy(dst: *mut u8, src: *const u8, n: usize) -> *mut u8 {
     // TODO: Implement memcpy
     // Hint: read bytes from src one by one and write to dst
-    todo!()
+    for offset in 0..n {
+        *dst.add(offset) = *src.add(offset);
+    }
+    dst
 }
 
 /// Set `n` bytes starting at `dst` to the value `c`.
@@ -39,7 +42,10 @@ pub unsafe extern "C" fn my_memcpy(dst: *mut u8, src: *const u8, n: usize) -> *m
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn my_memset(dst: *mut u8, c: u8, n: usize) -> *mut u8 {
     // TODO: Implement memset
-    todo!()
+    for offset in 0..n {
+        *dst.add(offset) = c;
+    }
+    dst
 }
 
 /// Copy `n` bytes from `src` to `dst`, correctly handling overlapping memory.
@@ -52,7 +58,19 @@ pub unsafe extern "C" fn my_memset(dst: *mut u8, c: u8, n: usize) -> *mut u8 {
 pub unsafe extern "C" fn my_memmove(dst: *mut u8, src: *const u8, n: usize) -> *mut u8 {
     // TODO: Implement memmove
     // Hint: when dst > src and regions overlap, copy backwards (from end to start)
-    todo!()
+    let dst_addr = dst as usize;
+    let src_addr = src as usize;
+
+    if dst_addr > src_addr && dst_addr < src_addr + n {
+        for i in (0..n).rev() {
+            *dst.add(i) = *src.add(i);
+        }
+    } else {
+        for i in 0..n {
+            *dst.add(i) = *src.add(i);
+        }
+    }
+    dst
 }
 
 /// Return the length of a null-terminated byte string, excluding the trailing null.
@@ -62,7 +80,11 @@ pub unsafe extern "C" fn my_memmove(dst: *mut u8, src: *const u8, n: usize) -> *
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn my_strlen(s: *const u8) -> usize {
     // TODO: Implement strlen
-    todo!()
+    let mut len = 0;
+    while *s.add(len) != '\0' as u8 {
+        len += 1;
+    }
+    len
 }
 
 /// Compare two null-terminated byte strings.
@@ -77,7 +99,19 @@ pub unsafe extern "C" fn my_strlen(s: *const u8) -> usize {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn my_strcmp(s1: *const u8, s2: *const u8) -> i32 {
     // TODO: Implement strcmp
-    todo!()
+    let mut offset = 0;
+    loop {
+        let ch1 = *s1.add(offset);
+        let ch2 = *s2.add(offset);
+        if ch1 < ch2 {
+            return 0 - (ch2 - ch1) as i32;
+        } else if ch1 > ch2 {
+            return (ch1 - ch2) as i32;
+        } else if ch1 == 0 {
+            return 0;
+        }
+        offset += 1;
+    }
 }
 
 // ============================================================
